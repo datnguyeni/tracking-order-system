@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: order-tracking
+
+integration:
+  tenten:
+    base-url: ${TENTEN_BASE_URL:}
+    token: ${TENTEN_INTEGRATION_TOKEN:}
+    connect-timeout: 5s
+    read-timeout: 15s
