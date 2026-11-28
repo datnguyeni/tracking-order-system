@@ -1,36 +1,38 @@
 package vn.order_tracking.entity;
 
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "user_roles")
-public class UserRole extends  BaseEntity{
-
+public class UserRole extends BaseEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "user_id", length = 36, nullable = false)
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "role_id", length = 36, nullable = false)
-    private UUID roleId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
+    @Setter(lombok.AccessLevel.NONE)
+    @JdbcTypeCode(SqlTypes.TINYINT)
     @Column(name = "active_unique_marker", insertable = false, updatable = false)
     private Boolean activeUniqueMarker;
+
+
 
 }

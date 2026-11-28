@@ -1,18 +1,15 @@
 package vn.order_tracking.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
-import java.time.Instant;
-import java.math.BigDecimal;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import vn.order_tracking.entity.enums.DiscountType;
 
 @Getter
 @Setter
@@ -22,6 +19,7 @@ import java.math.BigDecimal;
 public class Discounts extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
@@ -34,22 +32,26 @@ public class Discounts extends BaseEntity {
     @Column(name = "description", length = 1000)
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "discount_type", length = 20, nullable = false)
-    private String discountType;
+    private DiscountType discountType;
 
-    @Column(name = "discount_value")
+    @Column(name = "discount_value", precision = 19, scale = 2, nullable = false)
     private BigDecimal discountValue;
 
-    @Column(name = "max_discount_amount")
+    @Column(name = "max_discount_amount", precision = 19, scale = 2)
     private BigDecimal maxDiscountAmount;
 
-    @Column(name = "min_order_amount")
-    private BigDecimal minOrderAmount;
+    @Column(name = "min_order_amount", precision = 19, scale = 2, nullable = false)
+    private BigDecimal minOrderAmount = BigDecimal.ZERO;
 
-    @Column(name = "starts_at")
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
+    @Column(name = "starts_at", nullable = false)
     private Instant startsAt;
 
-    @Column(name = "ends_at")
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
+    @Column(name = "ends_at", nullable = false)
     private Instant endsAt;
 
     @Column(name = "usage_limit")
@@ -58,7 +60,6 @@ public class Discounts extends BaseEntity {
     @Column(name = "per_user_limit")
     private Integer perUserLimit;
 
-    @Column(name = "is_active")
-    private boolean isActive;
-
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
 }

@@ -1,19 +1,13 @@
 package vn.order_tracking.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
-import java.time.Instant;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -23,11 +17,13 @@ import java.time.Instant;
 public class AuditLogs extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "actor_id")
-    private UUID actorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "actor_id")
+    private User actor;
 
     @Column(name = "action", length = 100, nullable = false)
     private String action;
@@ -35,7 +31,8 @@ public class AuditLogs extends BaseEntity {
     @Column(name = "entity_type", length = 100, nullable = false)
     private String entityType;
 
-    @Column(name = "entity_id")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "entity_id", length = 36)
     private UUID entityId;
 
     @JdbcTypeCode(SqlTypes.JSON)
@@ -55,7 +52,14 @@ public class AuditLogs extends BaseEntity {
     @Column(name = "correlation_id", length = 100)
     private String correlationId;
 
-    @Column(name = "occurred_at")
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
+    @Column(name = "occurred_at", nullable = false)
     private Instant occurredAt;
 
+    @PrePersist
+    protected void initializeOccurredAt() {
+        if (occurredAt == null) {
+            occurredAt = Instant.now();
+        }
+    }
 }

@@ -1,17 +1,12 @@
 package vn.order_tracking.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
-import java.time.Instant;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -21,6 +16,7 @@ import java.time.Instant;
 public class Carriers extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
@@ -39,7 +35,6 @@ public class Carriers extends BaseEntity {
     @Column(name = "tracking_url_template", length = 2048)
     private String trackingUrlTemplate;
 
-    @Column(name = "is_active")
-    private boolean isActive;
-
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
 }

@@ -1,17 +1,12 @@
 package vn.order_tracking.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
-import java.time.Instant;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -21,14 +16,17 @@ import java.time.Instant;
 public class ProductImages extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "product_id")
-    private UUID productId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Products product;
 
-    @Column(name = "product_variant_id")
-    private UUID productVariantId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_variant_id")
+    private ProductVariants productVariant;
 
     @Column(name = "image_url", length = 2048, nullable = false)
     private String imageUrl;
@@ -37,9 +35,11 @@ public class ProductImages extends BaseEntity {
     private String altText;
 
     @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder;
+    private Integer sortOrder = 0;
 
-    @Column(name = "is_primary")
-    private boolean isPrimary;
+    @Column(name = "is_primary", nullable = false)
+    private boolean isPrimary = false;
+
+
 
 }

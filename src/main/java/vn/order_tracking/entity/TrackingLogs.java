@@ -1,21 +1,16 @@
 package vn.order_tracking.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import vn.order_tracking.entity.enums.ShipmentStatus;
-
-import java.util.UUID;
-import java.time.Instant;
-import java.math.BigDecimal;
+import vn.order_tracking.entity.enums.TrackingSource;
 
 @Getter
 @Setter
@@ -25,42 +20,57 @@ import java.math.BigDecimal;
 public class TrackingLogs extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "shipment_id")
-    private UUID shipmentId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "shipment_id", nullable = false)
+    private Shipments shipment;
 
-    @Column(name = "actor_id")
-    private UUID actorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "actor_id")
+    private User actor;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "from_status", length = 30)
     private ShipmentStatus fromStatus;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "to_status", length = 30, nullable = false)
     private ShipmentStatus toStatus;
 
-    @Column(name = "event_time")
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
+    @Column(name = "event_time", nullable = false)
     private Instant eventTime;
 
     @Column(name = "location", length = 500)
     private String location;
 
-    @Column(name = "latitude")
+    @Column(name = "latitude", precision = 9, scale = 6)
     private BigDecimal latitude;
 
-    @Column(name = "longitude")
+    @Column(name = "longitude", precision = 9, scale = 6)
     private BigDecimal longitude;
 
     @Column(name = "note", length = 2000)
     private String note;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "source", length = 20, nullable = false)
-    private String source;
+    private TrackingSource source;
 
-    @Column(name = "external_event_id")
-    private UUID externalEventId;
+    @Column(name = "external_event_id", length = 150)
+    private String externalEventId;
 
+    
+    @PrePersist
+    protected void initializeEventTime() {
+        if (eventTime == null) {
+            eventTime = Instant.now();
+        }
+    }
 }

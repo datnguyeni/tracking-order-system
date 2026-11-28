@@ -1,20 +1,15 @@
 package vn.order_tracking.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import vn.order_tracking.entity.enums.NotificationChannel;
 import vn.order_tracking.entity.enums.NotificationStatus;
-
-import java.util.UUID;
-import java.time.Instant;
 
 @Getter
 @Setter
@@ -24,20 +19,25 @@ import java.time.Instant;
 public class Notifications extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "order_id")
-    private UUID orderId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Orders order;
 
-    @Column(name = "tracking_log_id")
-    private UUID trackingLogId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tracking_log_id")
+    private TrackingLogs trackingLog;
 
     @Column(name = "event_key", length = 200, nullable = false)
     private String eventKey;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "channel", length = 10, nullable = false)
-    private String channel;
+    private NotificationChannel channel;
 
     @Column(name = "recipient", length = 320, nullable = false)
     private String recipient;
@@ -45,32 +45,42 @@ public class Notifications extends BaseEntity {
     @Column(name = "subject", length = 255)
     private String subject;
 
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", columnDefinition = "LONGTEXT", nullable = false)
     private String content;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "status", length = 20, nullable = false)
-    private NotificationStatus status;
+    private NotificationStatus status = NotificationStatus.PENDING;
 
     @Column(name = "retry_count", nullable = false)
-    private Integer retryCount;
+    private Integer retryCount = 0;
 
     @Column(name = "max_attempts", nullable = false)
-    private Integer maxAttempts;
+    private Integer maxAttempts = 5;
 
-    @Column(name = "next_retry_at")
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
+    @Column(name = "next_retry_at", nullable = false)
     private Instant nextRetryAt;
 
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
     @Column(name = "locked_until")
     private Instant lockedUntil;
 
     @Column(name = "locked_by", length = 100)
     private String lockedBy;
 
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
     @Column(name = "sent_at")
     private Instant sentAt;
 
     @Column(name = "last_error", length = 2000)
     private String lastError;
 
+    @PrePersist
+    protected void initializeNextRetryAt() {
+        if (nextRetryAt == null) {
+            nextRetryAt = Instant.now();
+        }
+    }
 }

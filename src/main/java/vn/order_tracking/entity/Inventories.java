@@ -1,17 +1,12 @@
 package vn.order_tracking.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
-import java.time.Instant;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -21,19 +16,18 @@ import java.time.Instant;
 public class Inventories extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "product_variant_id")
-    private UUID productVariantId;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "product_variant_id", nullable = false, unique = true)
+    private ProductVariants productVariant;
 
     @Column(name = "quantity_on_hand", nullable = false)
-    private Integer quantityOnHand;
+    private Integer quantityOnHand = 0;
 
     @Column(name = "quantity_reserved", nullable = false)
-    private Integer quantityReserved;
-
-    @Column(name = "row_version", nullable = false)
-    private Long rowVersion;
+    private Integer quantityReserved = 0;
 
 }

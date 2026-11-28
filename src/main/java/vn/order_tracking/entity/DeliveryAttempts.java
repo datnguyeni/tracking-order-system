@@ -1,20 +1,14 @@
 package vn.order_tracking.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import vn.order_tracking.entity.enums.DeliveryAttemptResult;
-
-import java.util.UUID;
-import java.time.Instant;
 
 @Getter
 @Setter
@@ -24,22 +18,27 @@ import java.time.Instant;
 public class DeliveryAttempts extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "shipment_id")
-    private UUID shipmentId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "shipment_id", nullable = false)
+    private Shipments shipment;
 
     @Column(name = "attempt_number", nullable = false)
     private Integer attemptNumber;
 
-    @Column(name = "shipper_id")
-    private UUID shipperId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "shipper_id", nullable = false)
+    private User shipper;
 
-    @Column(name = "attempted_at")
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
+    @Column(name = "attempted_at", nullable = false)
     private Instant attemptedAt;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "result", length = 20, nullable = false)
     private DeliveryAttemptResult result;
 
@@ -49,7 +48,8 @@ public class DeliveryAttempts extends BaseEntity {
     @Column(name = "note", length = 2000)
     private String note;
 
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
     @Column(name = "next_attempt_at")
     private Instant nextAttemptAt;
 
-}
+    }

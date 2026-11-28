@@ -1,25 +1,24 @@
 package vn.order_tracking.entity;
 
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;`r`nimport jakarta.persistence.GeneratedValue;`r`nimport jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "roles")
-public class Role extends  BaseEntity{
-
+public class Role extends BaseEntity {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
@@ -31,5 +30,20 @@ public class Role extends  BaseEntity{
 
     @Column(name = "description", length = 500)
     private String description;
+
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserRole> userRoles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RolePermissions> rolePermissions = new ArrayList<>();
+
+
+
+
+
+
+
+
+
 
 }

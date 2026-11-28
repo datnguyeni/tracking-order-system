@@ -1,17 +1,13 @@
 package vn.order_tracking.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
-import java.time.Instant;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -21,19 +17,23 @@ import java.time.Instant;
 public class PasswordResetTokens extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "user_id")
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "token_hash", length = 64)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "token_hash", length = 64, nullable = false)
     private String tokenHash;
 
-    @Column(name = "expires_at")
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
+    @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
+    @JdbcTypeCode(SqlTypes.TIMESTAMP)
     @Column(name = "used_at")
     private Instant usedAt;
-
 }

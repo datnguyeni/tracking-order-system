@@ -1,18 +1,14 @@
 package vn.order_tracking.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.UUID;
-import java.time.Instant;
-import java.math.BigDecimal;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import vn.order_tracking.entity.enums.DiscountType;
 
 @Getter
 @Setter
@@ -22,28 +18,35 @@ import java.math.BigDecimal;
 public class OrderDiscounts extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "id", length = 36, nullable = false, updatable = false)
     private UUID id;
 
-    @Column(name = "order_id")
-    private UUID orderId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Orders order;
 
-    @Column(name = "discount_id")
-    private UUID discountId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "discount_id", nullable = false)
+    private Discounts discount;
 
     @Column(name = "discount_code", length = 50, nullable = false)
     private String discountCode;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "discount_type", length = 20, nullable = false)
-    private String discountType;
+    private DiscountType discountType;
 
-    @Column(name = "discount_value")
+    @Column(name = "discount_value", precision = 19, scale = 2, nullable = false)
     private BigDecimal discountValue;
 
-    @Column(name = "discount_amount")
+    @Column(name = "discount_amount", precision = 19, scale = 2, nullable = false)
     private BigDecimal discountAmount;
 
-    @Column(name = "active_unique_marker")
-    private boolean activeUniqueMarker;
+    @Setter(lombok.AccessLevel.NONE)
+    @JdbcTypeCode(SqlTypes.TINYINT)
+    @Column(name = "active_unique_marker", insertable = false, updatable = false)
+    private Boolean activeUniqueMarker;
 
-}
+    }
